@@ -294,6 +294,25 @@ def sync_anthropic_hosted_providers():
 
     click.echo(click.style('Congratulations! Synced {} anthropic hosted providers.'.format(count), fg='green'))
 
+@click.command('update-document-index', help='Update document index.')
+def update_document_index():
+    from tasks.document_indexing_update_task import document_indexing_update_task
+    # 当不输入参数时，从数据库获取全部并递归进行
+    
+    datasets = db.session.query(Dataset).all()
+    for dataset in datasets:
+        click.echo(click.style(dataset.id, fg='green'))
+        documents = db.session.query(Document).filter(Document.dataset_id == dataset.id).all()
+        for document in documents:
+            click.echo(click.style(f'start update document {document.id} index.', fg='green'))
+            document_indexing_update_task(dataset.id, document.id)
+            click.echo(click.style(f'update document {document.name} index success.', fg='green'))
+
+    return
+    
+
+
+
 
 def register_commands(app):
     app.cli.add_command(reset_password)
@@ -303,3 +322,4 @@ def register_commands(app):
     app.cli.add_command(recreate_all_dataset_indexes)
     app.cli.add_command(sync_anthropic_hosted_providers)
     app.cli.add_command(clean_unused_dataset_indexes)
+    app.cli.add_command(update_document_index)
