@@ -284,8 +284,9 @@ class DocumentService:
             "github_link": str,
             "open_source_license": str,
             "commit_date": str,
-            "commit_author": str
-        }
+            "commit_author": str,
+        },
+        "others": dict
     }
 
     @staticmethod
@@ -972,7 +973,7 @@ class SegmentService:
                 db.session.add(segment)
                 db.session.commit()
                 # update segment vector index
-                VectorService.create_segment_vector(args['keywords'], segment, dataset)
+                VectorService.update_segment_vector(args['keywords'], segment, dataset)
         except Exception as e:
             logging.exception("update segment index failed")
             segment.enabled = False
